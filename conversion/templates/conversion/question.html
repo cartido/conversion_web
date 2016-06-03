@@ -1,24 +1,30 @@
+{% load staticfiles %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Conversion</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'conversion/css/bootstrap.min.css' %}">
 </head>
 <body>
-    {% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    <form action="{% url "conversion.views.question" %}" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Submit"/>
-    </form>
-    {% if response %}
-        <p>{{ source_measure }} is {{ response }}</p>
-    {% endif %}
+    <div class="center-block">
+        {% if messages %}
+        <ul class="messages bg-danger">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+
+        {% endif %}
+        <form action="{% url "conversion.views.question" %}" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Submit"/>
+        </form>
+        {% if response %}
+            <p>{{ source_measure }} is {{ response }}</p>
+        {% endif %}
+    </div>
 </body>
 </html>
