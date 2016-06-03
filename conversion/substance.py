@@ -9,10 +9,15 @@ class SubstanceRegistry(object):
     def __init__(self, filename = ''):
         self._substances = {}
 
+        module_dir = os.path.dirname(__file__)  # get current directory
+
+
         if filename == '':
-            self.load_definitions('substance_EN.txt')
+            file_path = os.path.join(module_dir, 'substance_EN.txt')
         elif filename is not None:
-            self.load_definitions(filename)
+            file_path = os.path.join(module_dir, filename)
+
+        self.load_definitions(file_path)
 
     def get_density(self, substance):
         if isinstance(substance, str):
@@ -55,9 +60,9 @@ class SubstanceRegistry(object):
 
             self._substances[name] = density
 
-        _adder(substance.name, substance.density)
+        _adder(substance.name, substance)
 
         for alias in substance.aliases:
-            _adder(alias, substance.density)
+            _adder(alias, substance)
 
 

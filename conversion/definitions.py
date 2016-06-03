@@ -26,7 +26,7 @@ class Definition(object):
             name = name.strip()
 
             result = [res.strip() for res in definition.split('=')]
-            density, aliases =  result[0], tuple(result[1:])
+            density, aliases =  float(result[0]), tuple(result[1:])
 
             return SubstanceDefinition(name, density, aliases)
         else:

@@ -5,12 +5,14 @@ import inflect
 from decimal import Decimal
 from pint import UnitRegistry,DimensionalityError, UndefinedUnitError
 from enum import Enum
+from conversion.substance import *
 
 class ConversionType(Enum):
     SameUnits = 1
     UsingDensity = 2
 
 ureg = UnitRegistry()
+sreg = SubstanceRegistry()
 
 class PintParser:
     """ Parse and normalize a question
@@ -33,8 +35,8 @@ class PintParser:
             self.source_unit = None
             self.raw_target_unit = None
             self.target_unit = None
-            self.raw_matter = None
-           # self.matter = Matter
+            self.raw_substance = None
+            self.matter = SubstanceDefinition
             self.response = None
             self.conversion_type = None
             self.error= None
@@ -44,7 +46,7 @@ class PintParser:
 
             self.source_unit = self.normalize_measure(self.raw_source_unit)
             self.target_unit = self.normalize_measure(self.raw_target_unit)
-            #self.matter = self.parse_raw_matter(self.raw_matter)
+            self.matter = self.define_substance(self.raw_substance)
 
             self.response = self.compute_response()
         except (DimensionalityError, UndefinedUnitError):
@@ -58,7 +60,7 @@ class PintParser:
 
         if parts_with_matter:
             self.raw_source_unit = parts_with_matter.group(1)
-            self.raw_matter = parts_with_matter.group(2)
+            self.raw_substance = parts_with_matter.group(2)
             self.raw_target_unit = parts_with_matter.group(3)
             self.conversion_type = ConversionType.UsingDensity
         elif parts_without_matter:
@@ -73,20 +75,15 @@ class PintParser:
             self.error = "I don't know what is '{raw_measure}'".format(raw_measure=raw_measure)
             raise err
 
-    '''
-    def parse_raw_matter(self, raw_matter):
-        if raw_matter:
-            working_string = str(raw_matter)
+
+    def define_substance(self, raw_substance):
+        if raw_substance:
+            working_string = str(raw_substance)
             working_string.lower()
             working_string.strip()
 
-            error = ""
+            return sreg.get_density(working_string)
 
-            if self.DbCaller.get_matter_by_name(working_string, self.matter, error):
-                return self.matter
-
-            return False
-    '''
     def compute_response(self):
         try:
             source_unit = self.source_unit
@@ -108,7 +105,7 @@ class PintParser:
 
 
 def test():
-    raw_string = "200 meters to miles"
+    raw_string = "200 l of flour to kg"
     parser = PintParser(raw_string)
 
     print('The pretty representation is {:~P}'.format(parser.response))

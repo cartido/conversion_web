@@ -1,2 +1,2 @@
-flour = 0.6
-corn = 0.75
+flour = 593
+butter = 911
