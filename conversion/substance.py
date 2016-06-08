@@ -4,7 +4,7 @@ from .definitions import *
 from .errors import *
 
 class SubstanceRegistry(object):
-    """The matter registry stores the definition of matters"""
+    """The substance registry stores the definition of matters"""
 
     def __init__(self, filename = ''):
         self._substances = {}
@@ -13,7 +13,7 @@ class SubstanceRegistry(object):
 
 
         if filename == '':
-            file_path = os.path.join(module_dir, 'substance_EN.txt')
+            file_path = os.path.join(module_dir, 'definition_files/substances_EN.txt')
         elif filename is not None:
             file_path = os.path.join(module_dir, filename)
 

@@ -23,7 +23,11 @@
         <input type="submit" value="Submit"/>
         </form>
         {% if response %}
-            <p>{{ source_measure }} is {{ response }}</p>
+            {% if substance %}
+                <p>{{ source_measure }} of {{ substance }} is {{ response }}</p>
+            {% else %}
+                <p>{{ source_measure }} is {{ response }}</p>
+            {% endif %}
         {% endif %}
     </div>
 </body>

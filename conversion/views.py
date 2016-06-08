@@ -22,6 +22,7 @@ def question(request):
         if form.is_valid():
             response = None
             source_measure = None
+            substance = None
             target_unit = None
 
             raw_question = form.cleaned_data['raw_question']
@@ -33,6 +34,7 @@ def question(request):
 
             else:
                 source_measure = '{:P}'.format(parser.source_unit)
+                substance = parser.substance.name
                 target_unit = '{:P}'.format(parser.target_unit)
                 response = '{:~P}'.format(parser.response)
 
