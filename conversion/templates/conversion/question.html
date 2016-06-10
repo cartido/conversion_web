@@ -6,8 +6,52 @@
     <meta charset="UTF-8">
     <title>Conversion</title>
     <link rel="stylesheet" type="text/css" href="{% static 'conversion/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'conversion/css/jquery.atwho.css' %}">
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://ichord.github.io/Caret.js/src/jquery.caret.js"></script>
+    <script type="text/javascript" src="{% static 'conversion/js/jquery.atwho.js' %}"></script>
+    <script type="text/javascript">
+  $(function(){
+    var substance = ["flour","butter"];
+    var units = ["gram","cup"];
+    $('input').atwho({
+      at: "of ",
+      startWithSpace: true,
+      data: substance,
+      limit: 200,
+      callbacks: {
+        afterMatchFailed: function(at, el) {
+          if (at == 'of ') {
+            tags.push(el.text().trim().slice(1));
+            this.model.save(tags);
+            this.insert(el.text().trim());
+            return false;
+          }
+        }
+      }
+    }).atwho({
+      at: "to ",
+      startWithSpace: true,
+      data: units,
+      limit: 200,
+      callbacks: {
+        afterMatchFailed: function(at, el) {
+          if (at == 'of ') {
+            tags.push(el.text().trim().slice(1));
+            this.model.save(tags);
+            this.insert(el.text().trim());
+            return false;
+          }
+        }
+      }
+    });
+  });
+  </script>
 </head>
 <body>
+
+
     <div class="center-block">
         {% if messages %}
         <ul class="messages bg-danger">
@@ -30,5 +74,6 @@
             {% endif %}
         {% endif %}
     </div>
+
 </body>
 </html>
