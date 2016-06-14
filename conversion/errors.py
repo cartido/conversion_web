@@ -29,3 +29,45 @@ class DefinitionSyntaxError(ValueError):
     def __str__(self):
         mess = "While opening {0}, in line {1}: "
         return mess.format(self.filename, self.lineno) + self.msg
+
+class UndefinedSubstanceError(ValueError):
+    """Raised when a substance name s not recognized.
+    """
+
+    def __init__(self, msg, filename=None, lineno=None):
+        super(ValueError, self).__init__()
+        self.msg = msg
+        self.filename = None
+        self.lineno = None
+
+    def __str__(self):
+        mess = "While opening {0}, in line {1}: "
+        return mess.format(self.filename, self.lineno) + self.msg
+
+class QuestionSyntaxError(ValueError):
+    """Raised when a question has a syntax error.
+    """
+
+    def __init__(self, msg, filename=None, lineno=None):
+        super(ValueError, self).__init__()
+        self.msg = msg
+        self.filename = None
+        self.lineno = None
+
+    def __str__(self):
+        mess = "While opening {0}, in line {1}: "
+        return mess.format(self.filename, self.lineno) + self.msg
+
+class NoDimensionality(ValueError):
+    """Raised when a measure has no diemsion
+    """
+
+    def __init__(self, msg, filename=None, lineno=None):
+        super(ValueError, self).__init__()
+        self.msg = msg
+        self.filename = None
+        self.lineno = None
+
+    def __str__(self):
+        mess = "While opening {0}, in line {1}: "
+        return mess.format(self.filename, self.lineno) + self.msg

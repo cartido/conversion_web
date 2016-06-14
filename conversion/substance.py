@@ -21,7 +21,10 @@ class SubstanceRegistry(object):
 
     def get_density(self, substance):
         if isinstance(substance, str):
-            return self._substances[substance]
+            if substance in self._substances.keys():
+                return self._substances[substance]
+            else:
+                raise UndefinedSubstanceError("'{substance}' is not define in the substance registry".format(substance=substance))
 
     def load_definitions(self, file):
         """Add matters defined in a definition text file.

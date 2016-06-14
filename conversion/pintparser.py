@@ -1,7 +1,5 @@
 import re
 import inflect
-#from db import DbCaller
-#from containers import Matter
 from decimal import Decimal
 from pint import UnitRegistry,DimensionalityError, UndefinedUnitError
 from enum import Enum
@@ -42,7 +40,7 @@ class PintParser:
             self.target_unit = None
             self.target_dimension = None
             self.raw_substance = None
-            self.substance = SubstanceDefinition
+            self.substance = None
             self.response = None
             self.conversion_type = None
             self.error= None
@@ -52,12 +50,14 @@ class PintParser:
 
             self.source_unit = self.normalize_measure(self.raw_source_unit, self.source_dimension)
             self.target_unit = self.normalize_measure(self.raw_target_unit, self.target_dimension)
-            self.source_dimension = self.normalize_dimension(self.source_unit.dimensionality)
-            self.target_dimension = self.normalize_dimension(self.target_unit.dimensionality)
-            self.substance = self.define_substance(self.raw_substance)
+            self.source_dimension = self.normalize_dimension(str(self.source_unit.dimensionality))
+            self.target_dimension = self.normalize_dimension(str(self.target_unit.dimensionality))
+
+            if isinstance(self.raw_substance, str):
+                self.substance = self.define_substance(self.raw_substance)
 
             self.response = self.compute_response()
-        except (DimensionalityError, UndefinedUnitError, UnedfinedSubstanceError, QuestionSyntaxError):
+        except (DimensionalityError, UndefinedUnitError, UndefinedSubstanceError, QuestionSyntaxError, NoDimensionality):
             pass
         except:
             raise
@@ -70,11 +70,9 @@ class PintParser:
             self.raw_source_unit = parts_with_matter.group(1)
             self.raw_substance = parts_with_matter.group(2)
             self.raw_target_unit = parts_with_matter.group(3)
-            self.conversion_type = ConversionType.UsingDensity
         elif parts_without_matter:
             self.raw_source_unit = parts_without_matter.group(1)
             self.raw_target_unit = parts_without_matter.group(2)
-            self.conversion_type = ConversionType.SameUnits
         else:
             self.error = "'{question}' is not a valide conversion".format(question = self.raw_string)
             raise QuestionSyntaxError("'{question}' is not a valide conversion".format(question = self.raw_string))
@@ -82,37 +80,54 @@ class PintParser:
     def normalize_measure(self, raw_measure, return_dimension):
         try:
             measure = ureg(raw_measure)
+
+            if not hasattr(measure, 'dimensionality'):
+                raise NoDimensionality("I don't recognize any dimensionality in '{raw_measure}'".format(raw_measure=raw_measure))
+
             return measure
         except UndefinedUnitError as err:
             self.error = "I don't know what is '{raw_measure}'".format(raw_measure=raw_measure)
             raise err
+        except NoDimensionality as err:
+            self.error = "I don't recognize any dimensionality in '{raw_measure}'".format(raw_measure=raw_measure)
+            raise err
+
 
     def normalize_dimension(self, raw_dimension):
-        for value in ureg._dimensions.values():
-            if value.reference == raw_dimension:
-                return value
-        return raw_dimension
-
+        if isinstance(raw_dimension, str):
+            for value in ureg._dimensions.values():
+                if value.reference == raw_dimension:
+                    return value
+            return raw_dimension
+        else:
+            return raw_dimension
 
     def define_substance(self, raw_substance):
         try:
-            if raw_substance:
-                working_string = str(raw_substance)
-                working_string.lower()
-                working_string.strip()
-
+            if isinstance(raw_substance, str):
+                working_string = self.clean_substance(raw_substance)
                 return sreg.get_density(working_string)
-        except UnedfinedSubstanceError as err:
+            else:
+                raise TypeError
+
+        except UndefinedSubstanceError as err:
             self.error = "I don't know what is '{raw_substance}'".format(raw_substance=raw_substance)
             raise err
 
+    def clean_substance(self, raw_substance):
+        working_string = raw_substance.strip()
+        working_string = working_string.lower()
+        working_string = self.inflect.singular_noun(working_string) \
+                if self.inflect.singular_noun(working_string) else working_string
+
+        return working_string
 
     def compute_response(self):
         try:
             source_unit = self.source_unit
             target_unit = self.target_unit
 
-            if self.conversion_type == ConversionType.UsingDensity :
+            if hasattr(self.substance, 'density') :
                 density = self.substance.density * ureg.kilogram / (ureg.meter ** 3)
                 return source_unit.to(target_unit, 'density', d = density)
             else:
@@ -125,7 +140,7 @@ class PintParser:
 
 
 def test():
-    raw_string = "1 l to g"
+    raw_string = "100g to gallon"
     parser = PintParser(raw_string)
 
     print('The pretty representation is {:~P}'.format(parser.response))

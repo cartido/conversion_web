@@ -28,15 +28,14 @@ def question(request):
             raw_question = form.cleaned_data['raw_question']
             parser = PintParser(raw_question)
 
-
             if parser.error:
                 messages.add_message(request,messages.ERROR, parser.error)
 
             else:
-                source_measure = '{:P}'.format(parser.source_unit)
-                substance = parser.substance.name
+                source_measure = '{:.1fP}'.format(parser.source_unit)
+                substance = parser.substance.name if hasattr(parser.substance, 'name') else None
                 target_unit = '{:P}'.format(parser.target_unit)
-                response = '{:~P}'.format(parser.response)
+                response = '{:.1fP}'.format(parser.response)
 
     else:
         form = QuestionForm()
